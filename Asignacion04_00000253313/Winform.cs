@@ -39,9 +39,18 @@ namespace Asignacion04_00000253313
         {
             dgvResultado.Rows.Clear();
 
-            double xi = double.Parse(txtXi.Text);
-            double xf = double.Parse(txtXf.Text);
-            double eamax = double.Parse(txtErrorMaximo.Text);
+            double xi, xf, eamax;
+            try
+            {
+                xi = double.Parse(txtXi.Text);
+                xf = double.Parse(txtXf.Text);
+                eamax = double.Parse(txtErrorMaximo.Text);
+            }
+            catch
+            {
+                MessageBox.Show("Ingresa valores numéricos válidos.", "Error de entrada", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
             try
             {
@@ -75,8 +84,13 @@ namespace Asignacion04_00000253313
             }
             catch (ArgumentException ex)
             {
-                // Aquí mostramos un mensaje amigable sin que el programa trunque
-                MessageBox.Show(ex.Message, "Error de intervalo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // Mensaje amigable por intervalos inválidos
+                MessageBox.Show(ex.Message, "Error de intervalo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                // Cualquier otro error, también amigable
+                MessageBox.Show("Ocurrió un error inesperado: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
         }
