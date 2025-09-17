@@ -13,71 +13,57 @@ namespace RaicesLogica.Servicio
     {
         public List<Iteracion> Biseccion(double xi, double xf, double eamax)
         {
-            //Aquí se creamos el objeto iteraciones
+            // Lista que almacenará todas las iteraciones realizadas
             var iteraciones = new List<Iteracion>();
+            double xr;               // Valor actual de la raíz aproximada
+            double xrAnterior = 0;   // Valor de la raíz de la iteración anterior
+            double ea = double.PositiveInfinity; // Error aproximado inicial muy grande
+            int contador = 0;        // Contador de iteraciones
 
-            double xr;
-            //Le damos un valor inicial de cero por defecto, pero al final del siclo
-            //se le da el valor de xr
-            double xrAnterior = 0;
-
-            //ea es el error aproximado, antes de la interación es un valor muy grande
-            //para que el primer caso entre al ciclo
-            double ea = double.PositiveInfinity;
-
-            //Como no usamos for este es nuestro contador
-            int contador = 0;
-
+            // Validación: xi y xf no pueden ser iguales
             if (xi == xf)
                 throw new ArgumentException("xi y xf no pueden ser iguales");
 
-         
+            // Evaluamos la función en los extremos
+            double fxi = FuncionesMatematicas.F(xi);
+            double fxf = FuncionesMatematicas.F(xf);
 
+            // Validación: para aplicar bisección debe cumplirse que f(xi) y f(xf) tengan signos opuestos
+            if (fxi * fxf > 0)
+                throw new ArgumentException("f(xi) y f(xf) deben tener signos opuestos");
 
+            // Ciclo iterativo hasta que el error sea menor al error máximo permitido
             do
             {
-                //Aumentamos el contador
                 contador++;
 
-                //Se saca la raiz
+                // Fórmula de bisección: punto medio del intervalo
                 xr = (xi + xf) / 2.0;
 
-                //Se saca la f de xi y xr
-                //F ya es una fucnión que se creo dentro de FuncionesMatematicas, en la carpeta funciones
-                double fxi = FuncionesMatematicas.F(xi);
+                // Evaluamos la función en xr
                 double fxr = FuncionesMatematicas.F(xr);
-                
 
-                //Aquí sucede el cambio de valores
-                if (fxi * fxr < 0.0)
+                // Actualizamos los intervalos dependiendo del signo
+                if (fxi * fxr < 0.0)   // La raíz está entre xi y xr
                 {
                     xf = xr;
-
+                    
                 }
-
-                else if (fxi * fxr > 0.0)
+                else if (fxi * fxr > 0.0) // La raíz está entre xr y xf
                 {
                     xi = xr;
+                 
                 }
-
                 else
                 {
-                    
-                    eamax = 0; // La raíz exacta se ha encontrado
-
-                    //Esto es por que uno de los valores sea fxi o fxr es cero por eso la raiz exacta es cero
-
+                    ea = 0; // Encontramos raíz exacta
                 }
 
-                //Aquí se afuerzas el contador tiene que ser mayor a uno, recordemos que el error
-                //se saca xr nueva - xr vieja / xr nueva por eso en la primera iteración no se puede sacar
+                // A partir de la segunda iteración calculamos el error relativo
                 if (contador > 1)
-                {
                     ea = FuncionesMatematicas.ErrorRelativo(xr, xrAnterior);
-                }
 
-                //Aquí se guarda todo en la lista de iteraciones, es un modelo que guarda todo los valores
-
+                // Guardamos esta iteración en la lista
                 iteraciones.Add(new Iteracion
                 {
                     Numero = contador,
@@ -88,20 +74,14 @@ namespace RaicesLogica.Servicio
                     Error = ea
                 });
 
-                //Aquí es donde el valor de xrAnterior se actualiza por xr
+                // Actualizamos xrAnterior para la siguiente iteración
                 xrAnterior = xr;
 
-
-                //Aquí podemos preguntar ¿Por que ea > eamax?
-                //Si ea es menor que eamax que nosotros pusimos en la aplicacion quiere decir
-                //que ya estabamos abajo del eamax que nosotros pusimos y es donde el clico termina
-                //por eso tiene que ser ea mayor que eamax para que el clico siga hasta que ea sea menor que eamax, ahí ya 
-                //termina.
-
-            } while (ea > eamax );
+            } while (ea > eamax); // El ciclo termina cuando el error es suficientemente pequeño
 
             return iteraciones;
         }
+
         public List<Iteracion> ReglaFalsa(double xi, double xf, double eamax)
         {
             var iteraciones = new List<Iteracion>();
@@ -111,42 +91,47 @@ namespace RaicesLogica.Servicio
             double xrAnterior = 0;
             double ea = double.PositiveInfinity;
 
+            // Validación: xi y xf no pueden ser iguales
             if (xi == xf)
                 throw new ArgumentException("xi y xf no pueden ser iguales");
 
+            // Evaluamos la función en los extremos
+            double fxi = FuncionesMatematicas.F(xi);
+            double fxf = FuncionesMatematicas.F(xf);
+
+            // Validación: f(xi) y f(xf) deben tener signos opuestos
+            if (fxi * fxf > 0)
+                throw new ArgumentException("f(xi) y f(xf) deben tener signos opuestos");
 
             do
             {
                 contador++;
 
-                double fxi = FuncionesMatematicas.F(xi);
-                double fxf = FuncionesMatematicas.F(xf);
-
                 // Fórmula de Regla Falsa
                 xr = (xi * fxf - xf * fxi) / (fxf - fxi);
                 double fxr = FuncionesMatematicas.F(xr);
 
-                // Actualización de intervalos
-                if (fxi * fxr < 0)
+                // Actualizamos los intervalos y sus valores de f(x)
+                if (fxi * fxr < 0)   // La raíz está entre xi y xr
                 {
                     xf = xr;
-                    fxf = fxr;
+                    fxf = fxr; //actualizar fxf
                 }
-                else if (fxi * fxr > 0)
+                else if (fxi * fxr > 0) // La raíz está entre xr y xf
                 {
                     xi = xr;
-                    fxi = fxr;
+                    fxi = fxr; // actualizar fxi
                 }
                 else
                 {
-                    ea = 0; // raíz exacta encontrada
+                    ea = 0; // Raíz exacta encontrada
                 }
 
+                // Calculamos el error relativo a partir de la segunda iteración
                 if (contador > 1)
-                {
                     ea = FuncionesMatematicas.ErrorRelativo(xr, xrAnterior);
-                }
 
+                // Guardamos la iteración
                 iteraciones.Add(new Iteracion
                 {
                     Numero = contador,
@@ -157,6 +142,7 @@ namespace RaicesLogica.Servicio
                     Error = ea
                 });
 
+                // Actualizamos xrAnterior
                 xrAnterior = xr;
 
             } while (ea > eamax);

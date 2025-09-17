@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using RaicesLogica.Model;
 using RaicesLogica.Servicio;
 
 namespace Asignacion04_00000253313
@@ -36,21 +37,29 @@ namespace Asignacion04_00000253313
 
         private void btnCalcular_Click(object sender, EventArgs e)
         {
-             // Limpiar tabla
             dgvResultado.Rows.Clear();
 
-            // Leer valores de los TextBox
             double xi = double.Parse(txtXi.Text);
             double xf = double.Parse(txtXf.Text);
-            double eamax = 0.0001; // error máximo
+            double eamax = double.Parse(txtErrorMaximo.Text);
 
-            MessageBox.Show($"F({xi}) = {RaicesLogica.Funciones.FuncionesMatematicas.F(xi)}\nF({xf}) = {RaicesLogica.Funciones.FuncionesMatematicas.F(xf)}",
-                "Valores de la función", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-
-            if (radbtnBiseccion.Checked)
+            try
             {
-                var iteraciones = _servicio.Biseccion(xi, xf, eamax);
+                List<Iteracion> iteraciones;
+
+                if (radbtnBiseccion.Checked)
+                {
+                    iteraciones = _servicio.Biseccion(xi, xf, eamax);
+                }
+                else if (radbtnReglaFalsa.Checked)
+                {
+                    iteraciones = _servicio.ReglaFalsa(xi, xf, eamax);
+                }
+                else
+                {
+                    MessageBox.Show("Selecciona un método primero.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
 
                 foreach (var item in iteraciones)
                 {
@@ -64,27 +73,12 @@ namespace Asignacion04_00000253313
                     );
                 }
             }
-            else if (radbtnReglaFalsa.Checked)
+            catch (ArgumentException ex)
             {
-                var iteraciones = _servicio.ReglaFalsa(xi, xf, eamax);
+                // Aquí mostramos un mensaje amigable sin que el programa trunque
+                MessageBox.Show(ex.Message, "Error de intervalo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
 
-                foreach (var item in iteraciones)
-                {
-                    dgvResultado.Rows.Add(
-                        item.Numero,
-                        item.Xi.ToString("F6"),
-                        item.Xf.ToString("F6"),
-                        item.Xr.ToString("F6"),
-                        item.FxR.ToString("F6"),
-                        item.Error.ToString("F6")
-                    );
-                }
-            }
-            else
-            {
-                MessageBox.Show("Selecciona un método primero.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-        
         }
     }
 }
