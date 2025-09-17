@@ -114,8 +114,6 @@ namespace RaicesLogica.Servicio
             if (xi == xf)
                 throw new ArgumentException("xi y xf no pueden ser iguales");
 
-            if (FuncionesMatematicas.F(xi) * FuncionesMatematicas.F(xf) > 0)
-                throw new ArgumentException("Los valores f(xi) y f(xf) deben tener signos opuestos");
 
             do
             {
